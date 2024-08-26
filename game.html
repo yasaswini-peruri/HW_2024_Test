@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The melon man</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Styling for the timer display */
+        #timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff0000; /* Red color for visibility */
+            position: fixed; /* Fixed position so it stays on the screen */
+            bottom: 20px; /* Adjust the position at the bottom */
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.7); /* Background with slight transparency */
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game">
+        <canvas id="canvas"></canvas>
+        
+        <div class="mobileControls">
+            <button class="mobileControls__button" onmousedown="game.moveLeft()" ontouchstart="game.moveLeft()" onmouseup="clearInterval(game.player.moveLeftInterval)" ontouchend="clearInterval(game.player.moveInterval)" disabled>Left</button>
+            <button class="mobileControls__button" onmousedown="game.moveRight()" ontouchstart="game.moveRight()" onmouseup="clearInterval(game.player.moveRightInterval)" ontouchend="clearInterval(game.player.moveInterval)" disabled>Right</button>
+            <button class="mobileControls__button" onmousedown="game.player.jump(); resetTimer()" ontouchstart="game.player.jump(); resetTimer()" disabled>Jump</button>
+        </div>
+
+        <p class="counter" id="counter">Angel Saver | Controls: <, > / arrows and SPACE | Points: 0</p>
+        <p id="timer">Time Left: <span id="timeLeft">5</span> seconds</p> <!-- Timer display -->
+    </div>
+
+    <script src="js/index.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/keyboard.js"></script>
+    <script src="js/drawing.js"></script>
+    <script src="js/generator.js"></script>
+    <script src="js/collisionDetection.js"></script>
+
+    <script>
+        let timeLeft = 5; // Initial time given to jump
+        let timerInterval;
+        let gameRunning = true;
+
+        function startTimer() {
+            timerInterval = setInterval(function () {
+                timeLeft--;
+                document.getElementById("timeLeft").innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            if (!gameRunning) return; // Prevent resetting the timer if the game is over
+            clearInterval(timerInterval);
+            timeLeft = 5; // Reset time
+            document.getElementById("timeLeft").innerText = timeLeft;
+            startTimer();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById("timer").innerText = "Time Over!";
+            document.querySelectorAll('.mobileControls__button').forEach(button => {
+                button.disabled = true; // Disable all control buttons
+            });
+            alert("Time Over! Game stopped.");
+            // Implement any other game over logic here
+        }
+
+        // Initialize the game and start the timer
+        game.init(function () {
+            game.generateMap();
+            game.requestRedraw();
+            startTimer(); // Start the timer when the game starts
+        });
+
+        // Event listeners
+        document.addEventListener("keydown", function(event) {
+            if (!gameRunning) return; // Prevent player from moving if the game is over
+            game.keydown.bind(game)(event);
+            if (event.key === " ") { // If spacebar is pressed to jump
+                resetTimer();
+            }
+        }, false);
+        
+        document.addEventListener("keyup", function(event) {
+            if (!gameRunning) return; // Prevent player from moving if the game is over
+            game.keyup.bind(game)(event);
+        }, false);
+        
+        document.body.onresize = function () {
+            if (!gameRunning) return; // Prevent screen resize from affecting the game if it's over
+            game.options.canvasWidth = window.innerWidth / 3,
+            game.options.canvasHeight = window.innerHeight / 3
+            game.canvas.width = game.options.canvasWidth
+            game.canvas.height = game.options.canvasHeight
+            game.requestRedraw();
+        };
+    </script>
+    <audio controls loop autoplay hidden>
+        <source src="sounds/music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+</body>
+</html>

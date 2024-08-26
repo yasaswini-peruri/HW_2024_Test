@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>The melon man</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="game">
+        <img src="clk5.gif" width="200px"; width="200px">
+        <canvas id="canvas"></canvas>
+        
+        <div class="mobileControls">
+            <button class="mobileControls__button" onmousedown="game.moveLeft()" ontouchstart="game.moveLeft()" onmouseup="clearInterval(game.player.moveLeftInterval)" ontouchend="clearInterval(game.player.moveInterval)">Left</button>
+            <button class="mobileControls__button" onmousedown="game.moveRight()" ontouchstart="game.moveRight()" onmouseup="clearInterval(game.player.moveRightInterval)" ontouchend="clearInterval(game.player.moveInterval)">Right</button>
+            <button class="mobileControls__button" onmousedown="game.player.jump(); resetTimer()" ontouchstart="game.player.jump(); resetTimer()">Jump</button>
+        </div>
+
+        <p class="counter" id="counter">A game by vj | Controls: W, D / arrows and SPACE | Points: 0</p>
+        <p id="timer">Time Left: <span id="timeLeft">5</span> seconds</p> <!-- Added timer display -->
+    </div>
+
+    <script src="js/index.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/keyboard.js"></script>
+    <script src="js/drawing.js"></script>
+    <script src="js/generator.js"></script>
+    <script src="js/collisionDetection.js"></script>
+
+    <script>
+        let timeLeft = 5; // Initial time given to jump
+        let timerInterval;
+
+        function startTimer() {
+            timerInterval = setInterval(function () {
+                timeLeft--;
+                document.getElementById("timeLeft").innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 5; // Reset time
+            document.getElementById("timeLeft").innerText = timeLeft;
+            startTimer();
+        }
+
+        function gameOver() {
+            alert("Game Over! You didn't jump in time.");
+            // Implement any other game over logic here
+        }
+
+        // Initialize the game and start the timer
+        game.init(function () {
+            game.generateMap();
+            game.requestRedraw();
+            startTimer(); // Start the timer when the game starts
+        });
+
+        // Event listeners
+        document.addEventListener("keydown", function(event) {
+            game.keydown.bind(game)(event);
+            if (event.key === " ") { // If spacebar is pressed to jump
+                resetTimer();
+            }
+        }, false);
+        
+        document.addEventListener("keyup", game.keyup.bind(game), false);
+        
+        document.body.onresize = function () {
+            game.options.canvasWidth = window.innerWidth / 3,
+            game.options.canvasHeight = window.innerHeight / 3
+            game.canvas.width = game.options.canvasWidth
+            game.canvas.height = game.options.canvasHeight
+            game.requestRedraw();
+        };
+    </script>
+    <audio controls loop autoplay hidden>
+        <source src="sounds/music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+</body>
+</html>
